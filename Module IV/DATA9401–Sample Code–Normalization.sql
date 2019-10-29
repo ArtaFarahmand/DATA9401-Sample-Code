@@ -57,7 +57,13 @@ ALTER TABLE AircraftOrders
 ADD CONSTRAINT fk_aircrafttype FOREIGN KEY (aircrafttype) 
 REFERENCES aircrafttype(aircrafttype);
 
---Code to remove duplicates (if i need it) SOLUTION A
+-- Adding a clustered Index to the joined airlines table
+CREATE INDEX airlineID_INX
+ON joinedairlines USING btree (airlineID); 
+
+ALTER TABLE joinedairlines CLUSTER ON airlineID_INX;
+
+--Code to remove duplicates (if i need it)
 SELECT aircrafttype, COUNT(aircrafttype)
 FROM aircrafttype GROUP BY aircrafttype
 HAVING COUNT(aircrafttype)>1 ORDER BY aircrafttype
@@ -90,10 +96,3 @@ ON aircrafttype.aircrafttype = aircraftinventory.aircrafttype
 INNER JOIN aircraftorders
 ON aircraftinventory.aircrafttype = aircraftorders.aircrafttype;
 
-
-
-
-
-
-
-SELECT * FROM parentAirlines
