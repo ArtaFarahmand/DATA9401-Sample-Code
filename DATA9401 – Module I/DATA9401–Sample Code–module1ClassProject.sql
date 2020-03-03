@@ -61,3 +61,5 @@ DELETE FROM student WHERE studentID = 12
 DROP TABLE grades;
 
 /*-- Alter Table --*/
+ALTER TABLE student 
+ADD COLUMN grade FLOAT;
