@@ -36,12 +36,14 @@ SELECT * FROM manhattonneighbourhood;
 SELECT * FROM brooklynneighbourhood;
 
 -- SQL built in Aggregate Functions -- 
+
 SELECT * FROM studentMarks;
 SELECT AVG(midtermexam) FROM studentMarks;
 SELECT SUM(finalExam) FROM studentMarks;
 SELECT COUNT(assignment1) FROM studentMarks;
 
 -- SQL built in String Functions -- 
+
 SELECT * FROM studentInfo;
 SELECT UPPER(firstname), UPPER(lastname) FROM studentInfo;
 SELECT LOWER(firstname), LOWER(lastname) FROM studentInfo;
