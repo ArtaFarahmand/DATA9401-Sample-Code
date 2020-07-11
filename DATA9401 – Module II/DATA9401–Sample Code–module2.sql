@@ -1,5 +1,3 @@
-SELECT * FROM nyairbnb_results
-
 -- Code to create a stored procedure --
 
 CREATE PROCEDURE sp_location (VARCHAR (200), VARCHAR (200), NUMERIC(9,6), NUMERIC(9,6))
@@ -31,5 +29,6 @@ CALL sp_location('Jennifer', 'Manhattan', 40.647490, -73.972370 );
 CALL sp_nyLocation('LisaRoxanne', 'Brooklyn', 40.747670, -73.975000 );
 
 -- Select statements to check if the stored procedure executed correctly --
+SELECT * FROM nyairbnb_results
 SELECT * FROM manhattonneighbourhood;
 SELECT * FROM brooklynneighbourhood;
