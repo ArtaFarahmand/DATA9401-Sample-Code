@@ -25,10 +25,12 @@ END;
 $$;
 
 -- Code to Execute a stored procedure --
+
 CALL sp_location('Jennifer', 'Manhattan', 40.647490, -73.972370 );
 CALL sp_nyLocation('LisaRoxanne', 'Brooklyn', 40.747670, -73.975000 );
 
 -- Select statements to check if the stored procedure executed correctly --
+
 SELECT * FROM nyairbnb_results
 SELECT * FROM manhattonneighbourhood;
 SELECT * FROM brooklynneighbourhood;
