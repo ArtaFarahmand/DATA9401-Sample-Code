@@ -51,11 +51,12 @@ ALTER TABLE orders
 ADD COLUMN catID INT;
 
 UPDATE orders
-SET catID = CASE WHEN category='Furniture' THEN 1
-									WHEN category='Clothing' THEN 2
-									WHEN category='Electronics' THEN 3
-									ELSE 0
-						END
+SET catID = CASE 
+	WHEN category='Furniture' THEN 1
+	WHEN category='Clothing' THEN 2
+	WHEN category='Electronics' THEN 3
+	ELSE 0
+END
 WHERE category IN ('Furniture', 'Clothing', 'Electronics');
 
 ALTER TABLE orders
