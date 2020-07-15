@@ -14,7 +14,8 @@ CREATE TABLE masterSales (
 
 -- Flat File to 1NF --
 
-/* Break table into two tables
+/* 
+Break table into two tables
 	- Customer Information
 	- Orders table
 */
@@ -30,7 +31,9 @@ FROM masterSales;
 
 -- Flat File to 2NF --
 
-/* check customerInfo table for Duplicate recordes */
+/* 
+check customerInfo table for Duplicate recordes 
+*/
 SELECT customerName, COUNT(*)
 FROM customerInfo GROUP BY customerName
 HAVING COUNT(customerName)>1 ORDER BY customerName;
@@ -38,7 +41,9 @@ HAVING COUNT(customerName)>1 ORDER BY customerName;
 DELETE FROM customerInfo a USING customerInfo b
 WHERE a.orderID < b.orderID AND a.customerName=b.customerName;
 
-/* check orders table for Duplicate recordes */
+/* 
+check orders table for Duplicate recordes 
+*/
 SELECT orderID, COUNT(*)
 FROM orders GROUP BY orderID
 HAVING COUNT(orderID)>1 ORDER BY orderID;
@@ -47,9 +52,15 @@ SELECT category, COUNT(*)
 FROM orders GROUP BY category
 HAVING COUNT(category)>1 ORDER BY category;
 
+/*
+Add a catID calumn
+*/
 ALTER TABLE orders
 ADD COLUMN catID INT;
 
+/*
+update catID calumn to be populated based on a condition
+*/
 UPDATE orders
 SET catID = CASE 
 	WHEN category='Furniture' THEN 1
@@ -59,10 +70,15 @@ SET catID = CASE
 END
 WHERE category IN ('Furniture', 'Clothing', 'Electronics');
 
+/*
+Drop the category column from orders table
+*/
 ALTER TABLE orders
 DROP COLUMN category;
 
--- Defining primary and foregin keys --
+/*
+ Defining primary and foregin keys 
+ */
 
 ALTER TABLE customerInfo
 ADD CONSTRAINT pk_orderID PRIMARY KEY (orderID);
@@ -79,16 +95,24 @@ ADD CONSTRAINT fk_catID FOREIGN KEY (catID)
 REFERENCES category(catID);
 
 -- Flat File to 3NF --
+
+/*
+Define category table
+*/
 CREATE TABLE category AS
 SELECT category, catID 
 FROM orders 
 WHERE catID=1 OR catID=2 OR catID=3
 
+/*
+Update category column for catID 3
+*/
 UPDATE category
 SET category='Electronics'
 WHERE catID=3;
 
 -- Result table after normalization --
+
 CREATE TABLE clothingSales AS 
 SELECT customerInfo.orderID, customerInfo.customerName
 	   , orders.orderDate, orders.amount, category.category
@@ -116,7 +140,7 @@ INNER JOIN category
 ON category.catID = orders.catID
 WHERE orders.catID = 1;
 
--- SELECT Statements --
+-- SELECT Statements to test results --
 
 SELECT * FROM masterSales;
 SELECT * FROM customerInfo;
