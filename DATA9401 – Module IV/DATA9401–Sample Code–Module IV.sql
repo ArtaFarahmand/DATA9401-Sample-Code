@@ -32,7 +32,7 @@ FROM masterSales;
 -- Flat File to 2NF --
 
 /* 
-check customerInfo table for Duplicate recordes 
+check customerInfo table for duplicate recordes 
 */
 SELECT customerName, COUNT(*)
 FROM customerInfo GROUP BY customerName
@@ -42,7 +42,7 @@ DELETE FROM customerInfo a USING customerInfo b
 WHERE a.orderID < b.orderID AND a.customerName=b.customerName;
 
 /* 
-check orders table for Duplicate recordes 
+check orders table for duplicate recordes 
 */
 SELECT orderID, COUNT(*)
 FROM orders GROUP BY orderID
