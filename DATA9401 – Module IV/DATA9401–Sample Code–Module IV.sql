@@ -79,7 +79,6 @@ DROP COLUMN category;
 /*
  Defining primary and foregin keys 
  */
-
 ALTER TABLE customerInfo
 ADD CONSTRAINT pk_orderID PRIMARY KEY (orderID);
 
