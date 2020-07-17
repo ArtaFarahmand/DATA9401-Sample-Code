@@ -104,7 +104,8 @@ SET gradeID = CASE
 	WHEn studentaverage >= 0.89 AND studentaverage <= 0.96 THEN 9
 	ELSE 0
 	END
-WHERE studentaverage IN (0.42, 0.49, 0.5, 0.54, 0.55, 0.57, 0.58, 0.6, 0.61, 0.63, 0.66, 0.67, 0.7, 0.71, 0.75, 0.76, 0.77, 0.82, 0.88, 0.89,  0.93);
+WHERE studentaverage IN (0.42, 0.49, 0.5, 0.54, 0.55, 0.57, 0.58, 0.6, 0.61,
+	 0.63, 0.66, 0.67, 0.7, 0.71, 0.75, 0.76, 0.77, 0.82, 0.88, 0.89,  0.93);
 
 -- Delete Duplicate Records --
 
