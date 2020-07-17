@@ -1,4 +1,4 @@
--- RAW Data Table --
+-- RAW data table --
 
 CREATE TABLE studentMaster(
 	studentID BIGINT,
