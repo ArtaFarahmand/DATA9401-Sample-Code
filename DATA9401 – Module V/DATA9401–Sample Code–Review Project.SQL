@@ -149,8 +149,13 @@ ON avgGrade.gradeID = letterGrade.gradeID
 -- Student AVG grade views -- 
 
 CREATE VIEW highGradeStudents AS
-SELECT studentID, firstName, lastName, studentAverage, grade
-FROM CourseGrade WHERE studentaverage=0.93;
+SELECT studentInformation.studentID, studentInformation.firstName, 
+studentInformation.lastName, avgGrade.studentAverage, letterGrade.grade
+FROM studentInformation INNER JOIN avgGrade
+ON studentInformation.studentID = avgGrade.studentID
+INNER JOIN letterGrade
+ON avgGrade.gradeID = letterGrade.gradeID
+WHERE studentaverage=0.93;
 
 CREATE VIEW midGradeStudents AS
 SELECT studentInformation.studentID, studentInformation.firstName, 
