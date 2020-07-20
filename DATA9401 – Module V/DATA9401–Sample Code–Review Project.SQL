@@ -96,8 +96,7 @@ WHERE gradeID IN (
 	SELECT gradeID
 	FROM (
 		SELECT gradeID,
-		ROW_NUMBER() OVER (PARTITION BY grade
-						  ORDER BY gradeID) AS ROW_NUM
+		ROW_NUMBER() OVER (PARTITION BY grade ORDER BY gradeID) AS ROW_NUM
 		FROM letterGrade) T
 	WHERE T.ROW_NUM > 1);
 
