@@ -88,6 +88,19 @@ HAVING COUNT(grade)>1 ORDER BY grade;
 DELETE FROM letterGrade a USING letterGrade b
 WHERE a.gradeID < b.gradeID AND a.grade=b.grade;
 
+/* Here is an alternative method for deleting 
+	Duplicate recordes */
+
+DELETE FROM letterGrade
+WHERE gradeID IN (
+	SELECT gradeID
+	FROM (
+		SELECT gradeID,
+		ROW_NUMBER() OVER (PARTITION BY grade
+						  ORDER BY gradeID) AS ROW_NUM
+		FROM letterGrade) T
+	WHERE T.ROW_NUM > 1);
+
 -- Update statments to add lettergradeID --
 
 UPDATE avgGrade
