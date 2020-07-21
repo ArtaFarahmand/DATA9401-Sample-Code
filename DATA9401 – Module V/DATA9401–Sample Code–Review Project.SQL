@@ -187,7 +187,6 @@ INNER JOIN letterGrade
 ON avgGrade.gradeID = letterGrade.gradeID
 WHERE studentaverage=0.54;
 
-
 -- Select statments to view results --
 
 SELECT * FROM studentMaster;
