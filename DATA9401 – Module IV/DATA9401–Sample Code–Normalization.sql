@@ -271,7 +271,7 @@ DELETE FROM aircraftOrders WHERE currentOrder IS NULL
 
 CREATE TABLE airlineAircraftOrders AS
 SELECT parentairline.fleetID, parentairline.airline, 
-	aircrafttype.aircraftType, aircraftorders.currentorder, aircraftorders.totalOrders 
+aircrafttype.aircraftType, aircraftorders.currentorder, aircraftorders.totalOrders 
 FROM parentairline INNER JOIN aircraftorders
 ON parentairline.fleetID = aircraftorders.fleetID
 INNER JOIN aircrafttype
