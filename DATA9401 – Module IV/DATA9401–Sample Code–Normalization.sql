@@ -146,230 +146,230 @@ WHERE tempID IN (
 	) T
 	WHERE T.ROW_NUM > 1);
 
-	/* 3NF table - remove transative dependencies */
-	CREATE TABLE aircraftType AS
-	SELECT fleetID, aircraftType
-	FROM airlines;
+/* 3NF table - remove transative dependencies */
+CREATE TABLE aircraftType AS
+SELECT fleetID, aircraftType
+FROM airlines;
 
-	CREATE TABLE unitCost AS
-	SELECT aircraftType, unitCost
-	FROM rawDATA;
+CREATE TABLE unitCost AS
+SELECT aircraftType, unitCost
+FROM rawDATA;
 
-	ALTER TABLE aircraftType
-	ADD COLUMN aircraftTypeID SERIAL;
+ALTER TABLE aircraftType
+ADD COLUMN aircraftTypeID SERIAL;
 
-	/* Count duplicates for aircraftType and unitCost */
-	SELECT * FROM (
-		SELECT *, COUNT(*)
-		OVER (
-			PARTITION BY fleetID, aircraftType
-		)AS COUNT FROM aircraftType) tableWidthCount
-		WHERE tableWidthCount.count > 1;
-		
-	SELECT * FROM (
-		SELECT *, COUNT(*)
-		OVER (
-			PARTITION BY aircraftTypeID, aircraftType
-		)AS COUNT FROM unitCost) tableWidthCount
-		WHERE tableWidthCount.count > 1;
+/* Count duplicates for aircraftType and unitCost */
+SELECT * FROM (
+	SELECT *, COUNT(*)
+	OVER (
+		PARTITION BY fleetID, aircraftType
+	)AS COUNT FROM aircraftType) tableWidthCount
+	WHERE tableWidthCount.count > 1;
+	
+SELECT * FROM (
+	SELECT *, COUNT(*)
+	OVER (
+		PARTITION BY aircraftTypeID, aircraftType
+	)AS COUNT FROM unitCost) tableWidthCount
+	WHERE tableWidthCount.count > 1;
 
-	/* Delete duplicates for aircraftType */
+/* Delete duplicates for aircraftType */
 
-	DELETE FROM aircraftType
-	WHERE aircraftTypeID IN (
-		SELECT aircraftTypeID
-		FROM (
-			SELECT aircraftTypeID,
-			ROW_NUMBER() OVER w AS ROW_NUM
-			FROM aircraftType WINDOW w AS (
-				PARTITION BY aircraftType ORDER BY aircraftType
-			)
-		) T
-		WHERE T.ROW_NUM > 1);
+DELETE FROM aircraftType
+WHERE aircraftTypeID IN (
+	SELECT aircraftTypeID
+	FROM (
+		SELECT aircraftTypeID,
+		ROW_NUMBER() OVER w AS ROW_NUM
+		FROM aircraftType WINDOW w AS (
+			PARTITION BY aircraftType ORDER BY aircraftType
+		)
+	) T
+	WHERE T.ROW_NUM > 1);
 
-	DELETE FROM unitCost
-	WHERE aircraftTypeID IN (
-		SELECT aircraftTypeID
-		FROM (
-			SELECT aircraftTypeID,
-			ROW_NUMBER() OVER w AS ROW_NUM
-			FROM unitCost WINDOW w AS (
-				PARTITION BY aircraftType ORDER BY aircraftType
-			)
-		) T
-		WHERE T.ROW_NUM > 1);
+DELETE FROM unitCost
+WHERE aircraftTypeID IN (
+	SELECT aircraftTypeID
+	FROM (
+		SELECT aircraftTypeID,
+		ROW_NUMBER() OVER w AS ROW_NUM
+		FROM unitCost WINDOW w AS (
+			PARTITION BY aircraftType ORDER BY aircraftType
+		)
+	) T
+	WHERE T.ROW_NUM > 1);
 
-	ALTER TABLE aircraftType
-	DROP COLUMN fleetID;
+ALTER TABLE aircraftType
+DROP COLUMN fleetID;
 
-	-- Add aircraft type id to orders and unitCost table as an fk --
+-- Add aircraft type id to orders and unitCost table as an fk --
 
-	ALTER TABLE aircraftOrders 
-	ADD COLUMN aircraftTypeID INT;
+ALTER TABLE aircraftOrders 
+ADD COLUMN aircraftTypeID INT;
 
-	ALTER TABLE unitCost 
-	ADD COLUMN aircraftTypeID INT;
+ALTER TABLE unitCost 
+ADD COLUMN aircraftTypeID INT;
 
-	UPDATE aircraftOrders
-	SET aircraftTypeID = CASE
-		WHEN aircraftType= 'Airbus A350' THEN 21
-		WHEN aircraftType= 'Antonov AN-124' THEN 22
-		WHEN aircraftType= 'Airbus A340' THEN 25
-		WHEN aircraftType= 'Airbus A350-900' THEN 27
-		WHEN aircraftType= 'Airbus A380' THEN 29
-		WHEN aircraftType= 'irkut MC-21' THEN 32
-		WHEN aircraftType= 'sukhoi superjet 100' THEN 37
-		WHEN aircraftType= 'Tupolev Tu-134' THEN 38
-		WHEN aircraftType= 'Yakovlev Yak-42' THEN 40
-		WHEN aircraftType= 'Viking Air DHC 6-400 Twin Otter' THEN 44
-		WHEN aircraftType= 'Antonov An-148/An-158' THEN 49
-		WHEN aircraftType= 'Boeing 777' THEN 53
-		WHEN aircraftType= 'Ilyushin il-62' THEN 54
-		WHEN aircraftType= 'Ilyushin il-96' THEN 55
-		WHEN aircraftType= 'Tupolev Tu-154' THEN 67
-		WHEN aircraftType= 'Tupolev Tu-204' THEN 68
-		WHEN aircraftType= 'Tupolev Tu-214' THEN 69
-		WHEN aircraftType= 'Airbus A310' THEN 70
-		WHEN aircraftType= 'Boeing 787 Dreeamliner' THEN 81
-		WHEN aircraftType= 'ATR 42/72' THEN 88
-		WHEN aircraftType= 'Boeing 747' THEN 102
-		WHEN aircraftType= 'Airbus A320' THEN 117
-		WHEN aircraftType= 'Airbus A319' THEN 118
-		WHEN aircraftType= 'Fokker F50/F60' THEN 126
-		WHEN aircraftType= 'Airbus A300' THEN 131
-		WHEN aircraftType= 'Saab 340' THEN 135
-		WHEN aircraftType= 'Airbus A321' THEN 139
-		WHEN aircraftType= 'Aérospatiale/BAC Concorde' THEN 148
-		WHEN aircraftType= 'Bombardier CS300' THEN 169
-		WHEN aircraftType= 'Embraer ERJ-170' THEN 171
-		WHEN aircraftType= 'McDonnell Douglas DC-9' THEN 174
-		WHEN aircraftType= 'COMAC C919' THEN 195
-		WHEN aircraftType= 'comac ARJ21' THEN 211
-		WHEN aircraftType= 'Boeing 757' THEN 221
-		WHEN aircraftType= 'Boeing 767' THEN 222
-		WHEN aircraftType= 'Airbus A318' THEN 231
-		WHEN aircraftType= 'British Aerospace BAe 146/Avro RJ' THEN 259
-		WHEN aircraftType= 'Fokker F70/F100' THEN 260
-		WHEN aircraftType= 'McDonnell Douglas DC-10' THEN 261
-		WHEN aircraftType= 'Canadair CRJ-1000' THEN 265
-		WHEN aircraftType= 'McDonnell Douglas DC-8' THEN 280
-		WHEN aircraftType= 'Embraer ERJ-190' THEN 283
-		WHEN aircraftType= 'Lockheed L-1011 TriStar' THEN 308
-		WHEN aircraftType= 'Boeing 737' THEN 310
-		WHEN aircraftType= 'Boeing 727' THEN 326
-		WHEN aircraftType= 'British Aerospace BAe ATP' THEN 330
-		WHEN aircraftType= 'Dornier Do-328' THEN 333
-		WHEN aircraftType= 'Airbus A330' THEN 341
-		WHEN aircraftType= 'McDonnel Douglas MD-11' THEN 373
-		WHEN aircraftType= 'Boeing 717' THEN 389
-		WHEN aircraftType= 'McDonnel Douglas MD-90' THEN 403
-		WHEN aircraftType= 'Canadair CRJ-100 Series' THEN 411
-		WHEN aircraftType= 'Canadair CRJ-900' THEN 413
-		WHEN aircraftType= 'Embraer' THEN 416
-		END
+UPDATE aircraftOrders
+SET aircraftTypeID = CASE
+	WHEN aircraftType= 'Airbus A350' THEN 21
+	WHEN aircraftType= 'Antonov AN-124' THEN 22
+	WHEN aircraftType= 'Airbus A340' THEN 25
+	WHEN aircraftType= 'Airbus A350-900' THEN 27
+	WHEN aircraftType= 'Airbus A380' THEN 29
+	WHEN aircraftType= 'irkut MC-21' THEN 32
+	WHEN aircraftType= 'sukhoi superjet 100' THEN 37
+	WHEN aircraftType= 'Tupolev Tu-134' THEN 38
+	WHEN aircraftType= 'Yakovlev Yak-42' THEN 40
+	WHEN aircraftType= 'Viking Air DHC 6-400 Twin Otter' THEN 44
+	WHEN aircraftType= 'Antonov An-148/An-158' THEN 49
+	WHEN aircraftType= 'Boeing 777' THEN 53
+	WHEN aircraftType= 'Ilyushin il-62' THEN 54
+	WHEN aircraftType= 'Ilyushin il-96' THEN 55
+	WHEN aircraftType= 'Tupolev Tu-154' THEN 67
+	WHEN aircraftType= 'Tupolev Tu-204' THEN 68
+	WHEN aircraftType= 'Tupolev Tu-214' THEN 69
+	WHEN aircraftType= 'Airbus A310' THEN 70
+	WHEN aircraftType= 'Boeing 787 Dreeamliner' THEN 81
+	WHEN aircraftType= 'ATR 42/72' THEN 88
+	WHEN aircraftType= 'Boeing 747' THEN 102
+	WHEN aircraftType= 'Airbus A320' THEN 117
+	WHEN aircraftType= 'Airbus A319' THEN 118
+	WHEN aircraftType= 'Fokker F50/F60' THEN 126
+	WHEN aircraftType= 'Airbus A300' THEN 131
+	WHEN aircraftType= 'Saab 340' THEN 135
+	WHEN aircraftType= 'Airbus A321' THEN 139
+	WHEN aircraftType= 'Aérospatiale/BAC Concorde' THEN 148
+	WHEN aircraftType= 'Bombardier CS300' THEN 169
+	WHEN aircraftType= 'Embraer ERJ-170' THEN 171
+	WHEN aircraftType= 'McDonnell Douglas DC-9' THEN 174
+	WHEN aircraftType= 'COMAC C919' THEN 195
+	WHEN aircraftType= 'comac ARJ21' THEN 211
+	WHEN aircraftType= 'Boeing 757' THEN 221
+	WHEN aircraftType= 'Boeing 767' THEN 222
+	WHEN aircraftType= 'Airbus A318' THEN 231
+	WHEN aircraftType= 'British Aerospace BAe 146/Avro RJ' THEN 259
+	WHEN aircraftType= 'Fokker F70/F100' THEN 260
+	WHEN aircraftType= 'McDonnell Douglas DC-10' THEN 261
+	WHEN aircraftType= 'Canadair CRJ-1000' THEN 265
+	WHEN aircraftType= 'McDonnell Douglas DC-8' THEN 280
+	WHEN aircraftType= 'Embraer ERJ-190' THEN 283
+	WHEN aircraftType= 'Lockheed L-1011 TriStar' THEN 308
+	WHEN aircraftType= 'Boeing 737' THEN 310
+	WHEN aircraftType= 'Boeing 727' THEN 326
+	WHEN aircraftType= 'British Aerospace BAe ATP' THEN 330
+	WHEN aircraftType= 'Dornier Do-328' THEN 333
+	WHEN aircraftType= 'Airbus A330' THEN 341
+	WHEN aircraftType= 'McDonnel Douglas MD-11' THEN 373
+	WHEN aircraftType= 'Boeing 717' THEN 389
+	WHEN aircraftType= 'McDonnel Douglas MD-90' THEN 403
+	WHEN aircraftType= 'Canadair CRJ-100 Series' THEN 411
+	WHEN aircraftType= 'Canadair CRJ-900' THEN 413
+	WHEN aircraftType= 'Embraer' THEN 416
+	END
 
-	ALTER TABLE aircraftOrders
-	DROP COLUMN aircraftType
+ALTER TABLE aircraftOrders
+DROP COLUMN aircraftType
 
-	UPDATE unitCost 
-	SET aircraftTypeID = CASE
-		WHEN aircraftType= 'Airbus A350' THEN 21
-		WHEN aircraftType= 'Antonov AN-124' THEN 22
-		WHEN aircraftType= 'Airbus A340' THEN 25
-		WHEN aircraftType= 'Airbus A350-900' THEN 27
-		WHEN aircraftType= 'Airbus A380' THEN 29
-		WHEN aircraftType= 'irkut MC-21' THEN 32
-		WHEN aircraftType= 'sukhoi superjet 100' THEN 37
-		WHEN aircraftType= 'Tupolev Tu-134' THEN 38
-		WHEN aircraftType= 'Yakovlev Yak-42' THEN 40
-		WHEN aircraftType= 'Viking Air DHC 6-400 Twin Otter' THEN 44
-		WHEN aircraftType= 'Antonov An-148/An-158' THEN 49
-		WHEN aircraftType= 'Boeing 777' THEN 53
-		WHEN aircraftType= 'llyushin il-62' THEN 54
-		WHEN aircraftType= 'llyushin il-96' THEN 55
-		WHEN aircraftType= 'Tupolev Tu-154' THEN 67
-		WHEN aircraftType= 'Tupolev Tu-204' THEN 68
-		WHEN aircraftType= 'Tupolev Tu-214' THEN 69
-		WHEN aircraftType= 'Airbus A310' THEN 70
-		WHEN aircraftType= 'Boeing 787 Dreeamliner' THEN 81
-		WHEN aircraftType= 'ATR 42/72' THEN 88
-		WHEN aircraftType= 'Boeing 747' THEN 102
-		WHEN aircraftType= 'Airbus A320' THEN 117
-		WHEN aircraftType= 'Airbus A319' THEN 118
-		WHEN aircraftType= 'Fokker F50/F60' THEN 126
-		WHEN aircraftType= 'Airbus A300' THEN 131
-		WHEN aircraftType= 'Saab 340' THEN 135
-		WHEN aircraftType= 'Airbus A321' THEN 139
-		WHEN aircraftType= 'Aérospatiale/BAC Concorde' THEN 148
-		WHEN aircraftType= 'Bombardier CS300' THEN 169
-		WHEN aircraftType= 'Embraer ERJ-170' THEN 171
-		WHEN aircraftType= 'McDonnell Douglas DC-9' THEN 174
-		WHEN aircraftType= 'COMAC C919' THEN 195
-		WHEN aircraftType= 'comac ARJ21' THEN 211
-		WHEN aircraftType= 'Boeing 757' THEN 221
-		WHEN aircraftType= 'Boeing 767' THEN 222
-		WHEN aircraftType= 'Airbus A318' THEN 231
-		WHEN aircraftType= 'British Aerospace BAe 146/Avro RJ' THEN 259
-		WHEN aircraftType= 'Fokker F70/F100' THEN 260
-		WHEN aircraftType= 'McDonnell Douglas DC-10' THEN 261
-		WHEN aircraftType= 'Canadair CRJ-1000' THEN 265
-		WHEN aircraftType= 'McDonnell Douglas DC-8' THEN 280
-		WHEN aircraftType= 'Embraer ERJ-190' THEN 283
-		WHEN aircraftType= 'Lockheed L-1011 TriStar' THEN 308
-		WHEN aircraftType= 'Boeing 737' THEN 310
-		WHEN aircraftType= 'Boeing 727' THEN 326
-		WHEN aircraftType= 'British Aerospace BAe ATP' THEN 330
-		WHEN aircraftType= 'Dornier Do-328' THEN 333
-		WHEN aircraftType= 'Airbus A330' THEN 341
-		WHEN aircraftType= 'McDonnell Douglas MD-11' THEN 373
-		WHEN aircraftType= 'Boeing 717' THEN 389
-		WHEN aircraftType= 'McDonnell Douglas MD-90' THEN 403
-		WHEN aircraftType= 'Canadair CRJ-100 Series' THEN 411
-		WHEN aircraftType= 'Canadair CRJ-900' THEN 413
-		WHEN aircraftType= 'Embraer' THEN 416
-		END
+UPDATE unitCost 
+SET aircraftTypeID = CASE
+	WHEN aircraftType= 'Airbus A350' THEN 21
+	WHEN aircraftType= 'Antonov AN-124' THEN 22
+	WHEN aircraftType= 'Airbus A340' THEN 25
+	WHEN aircraftType= 'Airbus A350-900' THEN 27
+	WHEN aircraftType= 'Airbus A380' THEN 29
+	WHEN aircraftType= 'irkut MC-21' THEN 32
+	WHEN aircraftType= 'sukhoi superjet 100' THEN 37
+	WHEN aircraftType= 'Tupolev Tu-134' THEN 38
+	WHEN aircraftType= 'Yakovlev Yak-42' THEN 40
+	WHEN aircraftType= 'Viking Air DHC 6-400 Twin Otter' THEN 44
+	WHEN aircraftType= 'Antonov An-148/An-158' THEN 49
+	WHEN aircraftType= 'Boeing 777' THEN 53
+	WHEN aircraftType= 'llyushin il-62' THEN 54
+	WHEN aircraftType= 'llyushin il-96' THEN 55
+	WHEN aircraftType= 'Tupolev Tu-154' THEN 67
+	WHEN aircraftType= 'Tupolev Tu-204' THEN 68
+	WHEN aircraftType= 'Tupolev Tu-214' THEN 69
+	WHEN aircraftType= 'Airbus A310' THEN 70
+	WHEN aircraftType= 'Boeing 787 Dreeamliner' THEN 81
+	WHEN aircraftType= 'ATR 42/72' THEN 88
+	WHEN aircraftType= 'Boeing 747' THEN 102
+	WHEN aircraftType= 'Airbus A320' THEN 117
+	WHEN aircraftType= 'Airbus A319' THEN 118
+	WHEN aircraftType= 'Fokker F50/F60' THEN 126
+	WHEN aircraftType= 'Airbus A300' THEN 131
+	WHEN aircraftType= 'Saab 340' THEN 135
+	WHEN aircraftType= 'Airbus A321' THEN 139
+	WHEN aircraftType= 'Aérospatiale/BAC Concorde' THEN 148
+	WHEN aircraftType= 'Bombardier CS300' THEN 169
+	WHEN aircraftType= 'Embraer ERJ-170' THEN 171
+	WHEN aircraftType= 'McDonnell Douglas DC-9' THEN 174
+	WHEN aircraftType= 'COMAC C919' THEN 195
+	WHEN aircraftType= 'comac ARJ21' THEN 211
+	WHEN aircraftType= 'Boeing 757' THEN 221
+	WHEN aircraftType= 'Boeing 767' THEN 222
+	WHEN aircraftType= 'Airbus A318' THEN 231
+	WHEN aircraftType= 'British Aerospace BAe 146/Avro RJ' THEN 259
+	WHEN aircraftType= 'Fokker F70/F100' THEN 260
+	WHEN aircraftType= 'McDonnell Douglas DC-10' THEN 261
+	WHEN aircraftType= 'Canadair CRJ-1000' THEN 265
+	WHEN aircraftType= 'McDonnell Douglas DC-8' THEN 280
+	WHEN aircraftType= 'Embraer ERJ-190' THEN 283
+	WHEN aircraftType= 'Lockheed L-1011 TriStar' THEN 308
+	WHEN aircraftType= 'Boeing 737' THEN 310
+	WHEN aircraftType= 'Boeing 727' THEN 326
+	WHEN aircraftType= 'British Aerospace BAe ATP' THEN 330
+	WHEN aircraftType= 'Dornier Do-328' THEN 333
+	WHEN aircraftType= 'Airbus A330' THEN 341
+	WHEN aircraftType= 'McDonnell Douglas MD-11' THEN 373
+	WHEN aircraftType= 'Boeing 717' THEN 389
+	WHEN aircraftType= 'McDonnell Douglas MD-90' THEN 403
+	WHEN aircraftType= 'Canadair CRJ-100 Series' THEN 411
+	WHEN aircraftType= 'Canadair CRJ-900' THEN 413
+	WHEN aircraftType= 'Embraer' THEN 416
+	END
 
-	-- Defining my pk and fk --
+-- Defining my pk and fk --
 
-	ALTER TABLE parentAirline
-	ADD CONSTRAINT pk_fleetID PRIMARY KEY (fleetID);
+ALTER TABLE parentAirline
+ADD CONSTRAINT pk_fleetID PRIMARY KEY (fleetID);
 
-	ALTER TABLE aircraftType
-	ADD CONSTRAINT pk_aircraftTypeID PRIMARY KEY (aircraftTypeID);
+ALTER TABLE aircraftType
+ADD CONSTRAINT pk_aircraftTypeID PRIMARY KEY (aircraftTypeID);
 
-	ALTER TABLE aircraftOrders
-	ADD CONSTRAINT fk_fleetID FOREIGN KEY (fleetID) 
-	REFERENCES parentAirline(fleetID);
+ALTER TABLE aircraftOrders
+ADD CONSTRAINT fk_fleetID FOREIGN KEY (fleetID) 
+REFERENCES parentAirline(fleetID);
 
-	ALTER TABLE aircraftOrders
-	ADD CONSTRAINT fk_aircraftTypeID FOREIGN KEY (aircraftTypeID) 
-	REFERENCES aircraftType(aircraftTypeID);
+ALTER TABLE aircraftOrders
+ADD CONSTRAINT fk_aircraftTypeID FOREIGN KEY (aircraftTypeID) 
+REFERENCES aircraftType(aircraftTypeID);
 
-	ALTER TABLE unitCost
-	ADD CONSTRAINT fk_aircraftTypeID FOREIGN KEY (aircraftTypeID) 
-	REFERENCES aircraftType(aircraftTypeID);
+ALTER TABLE unitCost
+ADD CONSTRAINT fk_aircraftTypeID FOREIGN KEY (aircraftTypeID) 
+REFERENCES aircraftType(aircraftTypeID);
 
-	/* special delete to remove rows with null values */
-	DELETE FROM aircraftOrders WHERE currentOrder IS NULL 
-		AND futureOrder IS NULL 
-		AND orders IS NULL 
-		AND totalOrders IS NULL;
+/* special delete to remove rows with null values */
+DELETE FROM aircraftOrders WHERE currentOrder IS NULL 
+	AND futureOrder IS NULL 
+	AND orders IS NULL 
+	AND totalOrders IS NULL;
 
-	-- Create result table for aircraft purchases --
+-- Create result table for aircraft purchases --
 
-	CREATE TABLE airlineAircraftOrders AS
-	SELECT parentairline.fleetID, parentairline.airline, 
-		aircrafttype.aircraftType, aircraftorders.currentorder, aircraftorders.totalOrders
-	FROM parentairline FULL OUTER JOIN aircraftorders
-	ON parentairline.fleetID = aircraftorders.fleetID
-	FULL OUTER JOIN aircrafttype
-	ON aircrafttype.aircraftTypeID = aircraftorders.aircraftTypeID;
+CREATE TABLE airlineAircraftOrders AS
+SELECT parentairline.fleetID, parentairline.airline, 
+	aircrafttype.aircraftType, aircraftorders.currentorder, aircraftorders.totalOrders
+FROM parentairline FULL OUTER JOIN aircraftorders
+ON parentairline.fleetID = aircraftorders.fleetID
+FULL OUTER JOIN aircrafttype
+ON aircrafttype.aircraftTypeID = aircraftorders.aircraftTypeID;
 
-	-- SELECT statement to view results --
-	SELECT * FROM rawData;
-	SELECT * FROM airlines;
-	SELECT * FROM parentAirline;
-	SELECT * FROM aircraftType;
-	SELECT * FROM unitCost;
-	SELECT * FROM aircraftOrders;
-	SELECT * FROM airlineAircraftOrders;
+-- SELECT statement to view results --
+SELECT * FROM rawData;
+SELECT * FROM airlines;
+SELECT * FROM parentAirline;
+SELECT * FROM aircraftType;
+SELECT * FROM unitCost;
+SELECT * FROM aircraftOrders;
+SELECT * FROM airlineAircraftOrders;
