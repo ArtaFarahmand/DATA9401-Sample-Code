@@ -48,10 +48,8 @@ SET fleetID = CASE
 	WHEN parentairline = 'American Airlines' THEN 'Air25'
 	ELSE 'noID'
 	END
-WHERE parentairline IN ('Aegean Airlines', 'Aeroflot', 'Aerolineas Argentinas', 'Air Algerie', 'Air Arabia','Air Arabia','Air Astana',
-'Air Berlin','Air Canada','Air China','Air Europa','Air France/KLM', 'Air India','Air Malta','Air Mauritius',
-'Air Nambia','Air Newzealannd','Air Transat','Air Transport International','Air Transport Service','Air Wisconsin','AirAsia','Alaska Airlines','Alitalia',
-'All Nippon Airlways','Allegiant Air','American Airlines');
+WHERE parentairline IN ('Aegean Airlines', 'Aeroflot', 'Aerolineas Argentinas', 'Air Algerie', 'Air Arabia','Air Arabia','Air Astana', 'Air Berlin','Air Canada','Air China','Air Europa','Air France/KLM', 'Air India','Air Malta','Air Mauritius','Air Nambia','Air Newzealannd','Air Transat','Air Transport International','Air Transport Service','Air Wisconsin','AirAsia',
+'Alaska Airlines','Alitalia','All Nippon Airlways','Allegiant Air','American Airlines');
 
 /* To simplify data set i am going to delete rows where fleetID is NULL */
 DELETE FROM rawData WHERE fleetID is NULL;
