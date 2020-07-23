@@ -1,98 +1,286 @@
--- Code to create tables in DB
-CREATE TABLE parentAirlines (
-	airlineID SERIAL NOT NULL,
-	parentAirline VARCHAR(150),
-	airline VARCHAR(150),
-	aircraftType VARCHAR(150),
-	currents INT,
-	future INT,
-	historic INT,
-	total INT,
+-- RAW Data Table --
+
+/* CSV file will be imported into this table
+	process maybe different for other server platforms */
+
+CREATE TABLE rawDATA (
+	fleetID VARCHAR(100),
+	parentAirline VARCHAR(250),
+	airline VARCHAR(250),
+	aircraftType VARCHAR(250),
+	currentOrder INT,
+	futureOrder INT,
+	historicOrder INT,
+	totalOrders INT,
 	orders INT,
-	unitCost VARCHAR(50),
-	totalCost VARCHAR(50),
-	average decimal(2,2)
+	unitCost MONEY,
+	totalCost MONEY
 );
 
--- SELECT statment to create new tables 
-CREATE TABLE Airlines
-AS SELECT airlineID, parentAirline, airline
-FROM parentAirlines;
+/* code to update fleetID with based on airline */
+UPDATE rawData 
+SET fleetID = CASE 
+	WHEN parentairline = 'Aegean Airlines' THEN 'Aegean01'
+	WHEN parentairline = 'Aeroflot' THEN 'Aero02'
+	WHEN parentairline = 'Aerolineas Argentinas' THEN 'Aerolineas03'
+	WHEN parentairline = 'Air Algerie' THEN 'Air04'
+	WHEN parentairline = 'Air Arabia' THEN 'Air05'
+	WHEN parentairline = 'Air Astana' THEN 'Air06'
+	WHEN parentairline = 'Air Berlin' THEN 'Air07'
+	WHEN parentairline = 'Air Canada' THEN 'Air08'
+	WHEN parentairline = 'Air China' THEN 'Air09'
+	WHEN parentairline = 'Air Europa' THEN 'Air10'
+	WHEN parentairline = 'Air France/KLM' THEN 'Air11'
+	WHEN parentairline = 'Air India' THEN 'Air12'
+	WHEN parentairline = 'Air Malta' THEN 'Air13'
+	WHEN parentairline = 'Air Mauritius' THEN 'Air14'
+	WHEN parentairline = 'Air Nambia' THEN 'Air15'
+	WHEN parentairline = 'Air Newzealannd' THEN 'Air16'
+	WHEN parentairline = 'Air Transat' THEN 'Air17'
+	WHEN parentairline = 'Air Transport International' THEN 'AirTransportI18'
+	WHEN parentairline = 'Air Transport Service' THEN 'AirTransportS18'
+	WHEN parentairline = 'Air Wisconsin' THEN 'Air19'
+	WHEN parentairline = 'AirAsia' THEN 'Air20'
+	WHEN parentairline = 'Alaska Airlines' THEN 'Air21'
+	WHEN parentairline = 'Alitalia' THEN 'Air22'
+	WHEN parentairline = 'All Nippon Airlways' THEN 'Air23'
+	WHEN parentairline = 'Allegiant Air' THEN 'Air24'
+	WHEN parentairline = 'American Airlines' THEN 'Air25'
+	ELSE 'noID'
+	END
+WHERE parentairline IN ('Aegean Airlines', 'Aeroflot', 'Aerolineas Argentinas', 'Air Algerie', 'Air Arabia','Air Arabia','Air Astana',
+						'Air Berlin','Air Canada','Air China','Air Europa','Air France/KLM', 'Air India','Air Malta','Air Mauritius',
+						'Air Nambia','Air Newzealannd','Air Transat','Air Transport International','Air Transport Service',
+						'Air Wisconsin','AirAsia','Alaska Airlines','Alitalia',
+						'All Nippon Airlways','Allegiant Air','American Airlines');
 
-CREATE TABLE airCraftType
-AS SELECT airlineID, aircrafttype
-FROM parentAirlines;
+/* To simplify data set i am going to delete rows where fleetID is NULL */
+DELETE FROM rawData WHERE fleetID is NULL;
+DELETE FROM airlines WHERE parentairline='';
 
-CREATE TABLE airCraftInventory
-AS SELECT aircrafttype, currents, future, 
-		  historic, total
-FROM parentAirlines;
+-- seperating the table into 1NF, 2NF and 3NF --
 
-CREATE TABLE AircraftOrders
-AS SELECT aircrafttype, orders, unitcost, 
-		  totalcost, average
-FROM parentAirlines;
+/* 1NF table - removing repeating groups - */
 
+/* Remove repeating groups in postgresql */
+CREATE TABLE airlines AS
+SELECT *, SPLIT_PART(parentairline::TEXT, '/', 1)::VARCHAR(250) AS parentairlineraw
+FROM rawData
+UNION
+SELECT *, SPLIT_PART(parentairline::TEXT, '/', 2)::VARCHAR(250) AS parentairlineraw
+FROM rawData;
 
--- Code for table alterations
-ALTER TABLE parentAirlines
-ALTER COLUMN average TYPE DECIMAL(10,2);
+CREATE TABLE airlines1NF AS
+SELECT fleetID, parentairlineraw, airline, aircrafttype, currentorder, futureorder, historicorder, orders, totalorders
+FROM airlines;
 
--- Code to define Primary and Foreign Keys
-ALTER TABLE Airlines
-ADD CONSTRAINT pk_airlineID PRIMARY KEY(airlineID);
+DROP TABLE airlines;
 
-ALTER TABLE aircrafttype
-ADD CONSTRAINT pk_aircrafttype PRIMARY KEY(aircrafttype);
+/* Resolve parentairline issues after removing the columns */
+ALTER TABLE airlines
+RENAME COLUMN parentairlineraw TO parentairline;
 
-ALTER TABLE airCraftType
-ADD CONSTRAINT fk_airlineID FOREIGN KEY (airlineID) 
-REFERENCES airlines(airlineID);
+UPDATE airlines
+SET fleetID = 'KLM12'
+WHERE parentairline = 'KLM';
 
-ALTER TABLE airCraftInventory
-ADD CONSTRAINT fk_aircrafttype FOREIGN KEY (aircrafttype) 
-REFERENCES aircrafttype(aircrafttype);
+UPDATE airlines
+SET parentairline = CASE 
+	WHEN airline = 'Air France' THEN parentairline = 'Air France'
+	WHEN airline = 'KLM' THEN parentairline = 'KLM'
+	WHEN airline = 'HOP!' THEN parentairline = 'KLM'
+	WHEN airline = 'KLM cityhopper' THEN parentairline = 'KLM'
+	WHEN airline = 'Martinair' THEN parentairline = 'Air France'
+	WHEN airline = 'Transavia' THEN parentairline = 'Air France'
+	WHEN airline = 'Transavia France' THEN parentairline = 'Air France'
+	END
+WHERE airline IN ('Air France', 'KLM', 'HOP!', 'KLM cityhopper', 
+				  'Martinair', 'Transavia', 'Transavia France');
+				  
+UPDATE airlines
+SET parentairline = 'KLM'
+WHERE parentairline = 'false';
 
-ALTER TABLE AircraftOrders
-ADD CONSTRAINT fk_aircrafttype FOREIGN KEY (aircrafttype) 
-REFERENCES aircrafttype(aircrafttype);
+UPDATE airlines
+SET parentairline = 'Air France'
+WHERE airline = 'Air France';
 
--- Adding a clustered Index to the joined airlines table
-CREATE INDEX airlineID_INX
-ON joinedairlines USING btree (airlineID); 
+UPDATE airlines
+SET parentairline = 'KLM'
+WHERE airline = 'KLM Cityhopper';
 
-ALTER TABLE joinedairlines CLUSTER ON airlineID_INX;
+/* 2NF table - removing duplicates and partial dependencies  */
 
---Code to remove duplicates (if i need it)
-SELECT aircrafttype, COUNT(aircrafttype)
-FROM aircrafttype GROUP BY aircrafttype
-HAVING COUNT(aircrafttype)>1 ORDER BY aircrafttype
+CREATE TABLE parentAirline AS
+SELECT fleetID, parentAirline, airline
+FROM airlines;
 
-DELETE FROM aircrafttype a USING aircrafttype b
-WHERE a.airlineID < b.airlineID AND a.aircrafttype=b.aircrafttype;
+CREATE TABLE aircraftOrders AS
+SELECT fleetID, currentOrder, futureOrder, orders, totalOrders, aircraftType
+FROM airlines;
 
--- Code to inner join 4 tables togather
-SELECT airlines.airlineID, airlines.airline, 
-aircrafttype.aircrafttype, aircraftinventory.currents,
-aircraftorders.orders, aircraftorders.unitcost, 
-aircraftorders.totalcost 
-FROM airlines INNER JOIN aircrafttype
-ON airlines.airlineID = aircrafttype.airlineID
-INNER JOIN aircraftinventory
-ON aircrafttype.aircrafttype = aircraftinventory.aircrafttype
-INNER JOIN aircraftorders
-ON aircraftinventory.aircrafttype = aircraftorders.aircrafttype;
+/* Count duplicates for parentAirline */
+SELECT * FROM (
+	SELECT *, COUNT(*)
+	OVER (
+		PARTITION BY fleetID, airline
+	)AS COUNT FROM parentAirline) tableWidthCount
+	WHERE tableWidthCount.count > 1;
+	
+/* Delete duplicates for parentAirline */
+ALTER TABLE parentAirline
+ADD COLUMN tempID SERIAL;
 
--- code to inner join 4 tables and create a new table at the sametime
-SELECT airlines.airlineID, airlines.airline, 
-aircrafttype.aircrafttype, aircraftinventory.currents,
-aircraftorders.orders, aircraftorders.unitcost, 
-aircraftorders.totalcost 
-INTO joinedAirlines
-FROM airlines INNER JOIN aircrafttype
-ON airlines.airlineID = aircrafttype.airlineID
-INNER JOIN aircraftinventory
-ON aircrafttype.aircrafttype = aircraftinventory.aircrafttype
-INNER JOIN aircraftorders
-ON aircraftinventory.aircrafttype = aircraftorders.aircrafttype;
+DELETE FROM parentAirline
+WHERE tempID IN (
+	SELECT tempID
+	FROM (
+		SELECT tempID,
+		ROW_NUMBER() OVER w AS ROW_NUM
+		FROM parentAirline WINDOW w AS (
+			PARTITION BY parentAirline ORDER BY parentAirline
+		)
+	) T
+	WHERE T.ROW_NUM > 1);
 
+/* 3NF table - remove transative dependencies */
+CREATE TABLE aircraftType AS
+SELECT fleetID, aircraftType
+FROM airlines;
+
+ALTER TABLE aircraftType
+ADD COLUMN aircraftTypeID SERIAL;
+
+/* Count duplicates for aircraftType */
+SELECT * FROM (
+	SELECT *, COUNT(*)
+	OVER (
+		PARTITION BY fleetID, aircraftType
+	)AS COUNT FROM aircraftType) tableWidthCount
+	WHERE tableWidthCount.count > 1;
+
+/* Delete duplicates for aircraftType */
+
+DELETE FROM aircraftType
+WHERE aircraftTypeID IN (
+	SELECT aircraftTypeID
+	FROM (
+		SELECT aircraftTypeID,
+		ROW_NUMBER() OVER w AS ROW_NUM
+		FROM aircraftType WINDOW w AS (
+			PARTITION BY aircraftType ORDER BY aircraftType
+		)
+	) T
+	WHERE T.ROW_NUM > 1);
+	
+ALTER TABLE aircraftType
+DROP COLUMN fleetID;
+
+-- Add aircraft type id to orders table as an fk --
+
+ALTER TABLE aircraftOrders 
+ADD COLUMN aircraftTypeID INT;
+
+UPDATE aircraftOrders
+SET aircraftTypeID = CASE
+	WHEN aircraftType= 'Airbus A350' THEN 21
+	WHEN aircraftType= 'Antonov AN-124' THEN 22
+	WHEN aircraftType= 'Airbus A340' THEN 25
+	WHEN aircraftType= 'Airbus A350-900' THEN 27
+	WHEN aircraftType= 'Airbus A380' THEN 29
+	WHEN aircraftType= 'irkut MC-21' THEN 32
+	WHEN aircraftType= 'sukhoi superjet 100' THEN 37
+	WHEN aircraftType= 'Tupolev Tu-134' THEN 38
+	WHEN aircraftType= 'Yakovlev Yak-42' THEN 40
+	WHEN aircraftType= 'Viking Air DHC 6-400 Twin Otter' THEN 44
+	WHEN aircraftType= 'Antonov An-148/An-158' THEN 49
+	WHEN aircraftType= 'Boeing 777' THEN 53
+	WHEN aircraftType= 'Ilyushin il-62' THEN 54
+	WHEN aircraftType= 'Ilyushin il-96' THEN 55
+	WHEN aircraftType= 'Tupolev Tu-154' THEN 67
+	WHEN aircraftType= 'Tupolev Tu-204' THEN 68
+	WHEN aircraftType= 'Tupolev Tu-214' THEN 69
+	WHEN aircraftType= 'Airbus A310' THEN 70
+	WHEN aircraftType= 'Boeing 787 Dreeamliner' THEN 81
+	WHEN aircraftType= 'ATR 42/72' THEN 88
+	WHEN aircraftType= 'Boeing 747' THEN 102
+	WHEN aircraftType= 'Airbus A320' THEN 117
+	WHEN aircraftType= 'Airbus A319' THEN 118
+	WHEN aircraftType= 'Fokker F50/F60' THEN 126
+	WHEN aircraftType= 'Airbus A300' THEN 131
+	WHEN aircraftType= 'Saab 340' THEN 135
+	WHEN aircraftType= 'Airbus A321' THEN 139
+	WHEN aircraftType= 'Aérospatiale/BAC Concorde' THEN 148
+	WHEN aircraftType= 'Bombardier CS300' THEN 169
+	WHEN aircraftType= 'Embraer ERJ-170' THEN 171
+	WHEN aircraftType= 'McDonnell Douglas DC-9' THEN 174
+	WHEN aircraftType= 'COMAC C919' THEN 195
+	WHEN aircraftType= 'comac ARJ21' THEN 211
+	WHEN aircraftType= 'Boeing 757' THEN 221
+	WHEN aircraftType= 'Boeing 767' THEN 222
+	WHEN aircraftType= 'Airbus A318' THEN 231
+	WHEN aircraftType= 'British Aerospace BAe 146/Avro RJ' THEN 259
+	WHEN aircraftType= 'Fokker F70/F100' THEN 260
+	WHEN aircraftType= 'McDonnell Douglas DC-10' THEN 261
+	WHEN aircraftType= 'Canadair CRJ-1000' THEN 265
+	WHEN aircraftType= 'McDonnell Douglas DC-8' THEN 280
+	WHEN aircraftType= 'Embraer ERJ-190' THEN 283
+	WHEN aircraftType= 'Lockheed L-1011 TriStar' THEN 308
+	WHEN aircraftType= 'Boeing 737' THEN 310
+	WHEN aircraftType= 'Boeing 727' THEN 326
+	WHEN aircraftType= 'British Aerospace BAe ATP' THEN 330
+	WHEN aircraftType= 'Dornier Do-328' THEN 333
+	WHEN aircraftType= 'Airbus A330' THEN 341
+	WHEN aircraftType= 'McDonnel Douglas MD-11' THEN 373
+	WHEN aircraftType= 'Boeing 717' THEN 389
+	WHEN aircraftType= 'McDonnel Douglas MD-90' THEN 403
+	WHEN aircraftType= 'Canadair CRJ-100 Series' THEN 411
+	WHEN aircraftType= 'Canadair CRJ-900' THEN 413
+	WHEN aircraftType= 'Embraer' THEN 416
+	END
+
+ALTER TABLE aircraftOrders
+DROP COLUMN aircraftType
+
+-- Defining my pk and fk --
+
+ALTER TABLE parentAirline
+ADD CONSTRAINT pk_fleetID PRIMARY KEY (fleetID);
+
+ALTER TABLE aircraftType
+ADD CONSTRAINT pk_aircraftTypeID PRIMARY KEY (aircraftTypeID);
+
+ALTER TABLE aircraftOrders
+ADD CONSTRAINT fk_fleetID FOREIGN KEY (fleetID) 
+REFERENCES parentAirline(fleetID);
+
+ALTER TABLE aircraftOrders
+ADD CONSTRAINT fk_aircraftTypeID FOREIGN KEY (aircraftTypeID) 
+REFERENCES aircraftType(aircraftTypeID);
+
+/* special delete to remove rows with null values */
+DELETE FROM aircraftOrders WHERE currentOrder IS NULL 
+	AND futureOrder IS NULL 
+	AND orders IS NULL 
+	AND totalOrders IS NULL;
+
+-- Create result table for aircraft purchases --
+
+CREATE TABLE airlineAircraftOrders AS
+SELECT parentairline.fleetID, parentairline.airline, 
+	aircrafttype.aircraftType, aircraftorders.currentorder, aircraftorders.totalOrders 
+FROM parentairline INNER JOIN aircraftorders
+ON parentairline.fleetID = aircraftorders.fleetID
+INNER JOIN aircrafttype
+ON aircrafttype.aircraftTypeID = aircraftorders.aircraftTypeID
+
+-- SELECT statement to view results --
+SELECT * FROM rawData;
+SELECT * FROM airlines;
+SELECT * FROM parentAirline;
+SELECT * FROM aircraftType
+WHERE aircrafttype='Airbus A320';
+SELECT * FROM aircraftOrders
+WHERE aircrafttypeID=117 ;
+SELECT * FROM airlineAircraftOrders
+WHERE fleetID='Aero02' ;
