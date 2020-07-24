@@ -389,6 +389,16 @@ INNER JOIN unitCost
 ON aircrafttype.aircraftTypeID = unitCost.aircraftTypeID
 WHERE currentOrder IS NOT NULL OR totalOrders IS NOT NULL;
 
+-- Replaced NULL values with 0 in the airlineAircraftOrders table --
+
+UPDATE airlineAircraftOrders
+SET currentOrder = 0 
+WHERE currentOrder IS NULL;
+
+UPDATE airlineAircraftOrders
+SET totalOrders = 0 
+WHERE totalOrders IS NULL;
+
 -- SELECT statement to view results --
 SELECT * FROM rawData;
 SELECT * FROM airlines;
