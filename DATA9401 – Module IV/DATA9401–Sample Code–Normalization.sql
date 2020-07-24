@@ -173,7 +173,7 @@ SELECT * FROM (
 	)AS COUNT FROM unitCost) tableWidthCount
 	WHERE tableWidthCount.count > 1;
 
-/* Delete duplicates for aircraftType */
+/* Delete duplicates for aircraftType & unitCost */
 
 DELETE FROM aircraftType
 WHERE aircraftTypeID IN (
@@ -186,6 +186,10 @@ WHERE aircraftTypeID IN (
 		)
 	) T
 	WHERE T.ROW_NUM > 1);
+
+/* Add a tempID to be able to correctly remove dupliates */
+ALTER TABLE unitCost
+ADD COLUMN tempID SERIAL;
 
 DELETE FROM unitCost
 WHERE aircraftTypeID IN (
@@ -201,6 +205,10 @@ WHERE aircraftTypeID IN (
 
 ALTER TABLE aircraftType
 DROP COLUMN fleetID;
+
+/* Drop tempID as it is no longer needed */
+ALTER TABLE unitCost
+DROP COLUMN tempID;
 
 -- Add aircraft type id to orders and unitCost table as an fk --
 
@@ -370,11 +378,13 @@ DELETE FROM aircraftOrders WHERE currentOrder IS NULL
 CREATE TABLE airlineAircraftOrders AS
 SELECT parentairline.fleetID, parentairline.airline, 
 	aircrafttype.aircraftType, aircraftorders.currentorder, 
-	aircraftorders.totalOrders
+	aircraftorders.totalOrders, unitCost.unitCost
 FROM parentairline INNER JOIN aircraftorders
 ON parentairline.fleetID = aircraftorders.fleetID
 INNER JOIN aircrafttype
-ON aircrafttype.aircraftTypeID = aircraftorders.aircraftTypeID;
+ON aircrafttype.aircraftTypeID = aircraftorders.aircraftTypeID
+INNER JOIN unitCost
+ON aircrafttype.aircraftTypeID = unitCost.aircraftTypeID
 
 -- SELECT statement to view results --
 SELECT * FROM rawData;
