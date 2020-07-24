@@ -1,7 +1,7 @@
 -- RAW Data Table --
 
 /* CSV file will be imported into this table
-	process maybe different for other server platforms */
+process maybe different for other server platforms */
 
 CREATE TABLE rawDATA (
 	fleetID VARCHAR(100),
