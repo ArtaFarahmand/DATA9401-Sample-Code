@@ -73,10 +73,12 @@ UNION
 SELECT *, SPLIT_PART(parentairline::TEXT, '/', 2)::VARCHAR(250) AS parentairlineraw
 FROM rawData;
 
+
 CREATE TABLE airlines1NF AS
 SELECT fleetID, parentairlineraw, airline, aircrafttype, currentorder, futureorder, historicorder, orders, totalorders
 FROM airlines;
 
+/* We no longer need the airlines tabel after removing our repeating groups after creating the airlines1NF which will be renamed to airlines */
 DROP TABLE airlines;
 
 /* Resolve parentairline issues after removing the columns */
