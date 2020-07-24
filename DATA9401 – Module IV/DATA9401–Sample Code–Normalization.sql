@@ -387,6 +387,7 @@ INNER JOIN aircrafttype
 ON aircrafttype.aircraftTypeID = aircraftorders.aircraftTypeID
 INNER JOIN unitCost
 ON aircrafttype.aircraftTypeID = unitCost.aircraftTypeID
+WHERE currentOrder IS NOT NULL OR totalOrders IS NOT NULL;
 
 -- SELECT statement to view results --
 SELECT * FROM rawData;
