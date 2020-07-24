@@ -327,6 +327,16 @@ SET aircraftTypeID = CASE
 	WHEN aircraftType= 'Canadair CRJ-100 Series' THEN 411
 	WHEN aircraftType= 'Canadair CRJ-900' THEN 413
 	WHEN aircraftType= 'Embraer' THEN 416
+	WHEN aircraftType = 'Fokker F70 / F100' THEN 260
+	WHEN aircraftType = 'Fokker F50 / F60' THEN 126
+	WHEN aircraftType = 'Boeing 787' THEN 124
+	WHEN aircraftType = 'Boeing 787 Dreamliner' THEN 81
+	WHEN aircraftType = 'Airbus A350 XWB' THEN 187
+	WHEN aircraftType = 'COMAC C919' THEN 195
+	WHEN aircraftType = 'Embraer ERJ-145' THEN 416
+	WHEN aircraftType = 'Ilyushin Il-96' THEN 55
+	WHEN aircraftType = 'Irkut MC-21' THEN 32
+	WHEN aircraftType = 'Sukhoi Superjet 100' THEN 37
 	END
 
 -- Defining my pk and fk --
