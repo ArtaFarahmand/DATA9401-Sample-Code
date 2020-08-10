@@ -407,5 +407,3 @@ SELECT * FROM aircraftType;
 SELECT * FROM unitCost;
 SELECT * FROM aircraftOrders;
 SELECT * FROM airlineAircraftOrders;
-
--- HELLO GITHUB WORLD --
