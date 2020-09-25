@@ -148,6 +148,17 @@ WHERE studentID = 47058;
 DELETE FROM avgGrade 
 WHERE studentID = 64698;
 
+-- Code to add a Timestamp Colum to the grade Table --
+
+ALTER TABLE studentCourseGrades
+ADD COLUMN dataEnteryTime TIMESTAMP;
+
+UPDATE studentCourseGrades
+SET dataEnteryTime = current_timestamp
+WHERE dataEnteryTime IS NULL;
+
+SELECT * FROM studentCourseGrades;
+
 -- Table to show student AVG and letter grade --
 
 CREATE TABLE CourseGrade AS
